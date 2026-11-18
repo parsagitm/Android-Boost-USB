@@ -66,7 +66,7 @@ public class MainActivity extends Activity {
         content.addView(title);
 
         TextView subtitle = text(
-            "USB Device Optimizer • نسخه ۰.۲",
+            "SMART DEVICE OPTIMIZER • نسخه ۰.۳",
             13,MUTED,false
         );
         subtitle.setGravity(Gravity.CENTER);
@@ -80,7 +80,11 @@ public class MainActivity extends Activity {
             "\nSDK: " + Build.VERSION.SDK_INT
         );
 
-        Button optimize = button("داشبورد بهینه‌سازی گوشی");
+        Button smart = button("بهینه‌سازی هوشمند گوشی");
+        smart.setOnClickListener(v -> showSmartOptimizer());
+        content.addView(smart);
+
+        Button optimize = button("داشبورد RAM و حافظه");
         optimize.setOnClickListener(v -> showDashboard());
         content.addView(optimize);
 
@@ -90,14 +94,240 @@ public class MainActivity extends Activity {
 
         addPanel(
             "وضعیت",
-            "بررسی اطلاعات دستگاه فعال است. هیچ برنامه‌ای بدون اجازه کاربر حذف نمی‌شود."
+            "هیچ برنامه‌ای بدون اجازه کاربر حذف یا تغییری در تنظیمات اعمال نمی‌شود."
         );
+    }
+
+    private String detectBrand() {
+        String brand = Build.MANUFACTURER.toLowerCase(Locale.ROOT);
+        String model = Build.MODEL.toLowerCase(Locale.ROOT);
+
+        if(brand.contains("samsung")) return "Samsung Galaxy / One UI";
+        if(brand.contains("xiaomi") ||
+           brand.contains("redmi") ||
+           brand.contains("poco") ||
+           model.contains("redmi") ||
+           model.contains("poco")) {
+            return "Xiaomi / Redmi / POCO";
+        }
+        if(brand.contains("google")) return "Google Pixel";
+        if(brand.contains("huawei")) return "Huawei";
+        if(brand.contains("honor")) return "HONOR";
+        if(brand.contains("oppo")) return "OPPO";
+        if(brand.contains("vivo")) return "Vivo";
+        if(brand.contains("realme")) return "Realme";
+        if(brand.contains("motorola")) return "Motorola";
+
+        return Build.MANUFACTURER + " / Android";
+    }
+
+    private void showSmartOptimizer() {
+        content.removeAllViews();
+
+        TextView title = text(
+            "ANDROID BOOST SMART ENGINE",
+            22,GREEN,true
+        );
+        title.setGravity(Gravity.CENTER);
+        content.addView(title);
+
+        addPanel(
+            "دستگاه شناسایی شد",
+            "برند: " + detectBrand() +
+            "\nمدل: " + Build.MODEL +
+            "\nنسخه اندروید: " + Build.VERSION.RELEASE +
+            "\nنسخه سیستم: " + Build.DISPLAY
+        );
+
+        ActivityManager manager =
+            (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+
+        long totalRam = 0;
+        long freeRam = 0;
+
+        if(manager != null) {
+            ActivityManager.MemoryInfo info =
+                new ActivityManager.MemoryInfo();
+
+            manager.getMemoryInfo(info);
+
+            totalRam = info.totalMem;
+            freeRam = info.availMem;
+        }
+
+        long usedRam = Math.max(0,totalRam-freeRam);
+
+        File path = Environment.getDataDirectory();
+        StatFs stat = new StatFs(path.getPath());
+
+        long totalStorage =
+            stat.getBlockSizeLong() * stat.getBlockCountLong();
+
+        long freeStorage =
+            stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
+
+        long usedStorage = totalStorage-freeStorage;
+
+        addPanel(
+            "نتیجه بررسی اولیه",
+            "RAM مصرف‌شده: " + formatSize(usedRam) +
+            "\nRAM آزاد: " + formatSize(freeRam) +
+            "\nفضای اشغال‌شده: " + formatSize(usedStorage) +
+            "\nفضای خالی: " + formatSize(freeStorage)
+        );
+
+        addPanel(
+            "اقدامات پیشنهادی",
+            "هر اقدام را جداگانه انتخاب کن. قبل از باز شدن تنظیمات، تأیید می‌گیریم."
+        );
+
+        addAction(
+            "مدیریت برنامه‌های پس‌زمینه",
+            "بررسی برنامه‌های در حال اجرا و محدود کردن برنامه‌های غیرضروری از تنظیمات گوشی.",
+            android.provider.Settings.ACTION_APPLICATION_SETTINGS
+        );
+
+        addAction(
+            "مدیریت مصرف باتری",
+            "بررسی مصرف باتری و تنظیم محدودیت برای برنامه‌های پرمصرف.",
+            android.provider.Settings.ACTION_BATTERY_SAVER_SETTINGS
+        );
+
+        addAction(
+            "مدیریت حافظه داخلی",
+            "بررسی فضای ذخیره‌سازی و پاک‌سازی فایل‌های غیرضروری توسط خود کاربر.",
+            android.provider.Settings.ACTION_INTERNAL_STORAGE_SETTINGS
+        );
+
+        if(Build.MANUFACTURER.toLowerCase(Locale.ROOT).contains("samsung")) {
+            addVendorAction(
+                "ابزار Device Care سامسونگ",
+                "باز کردن ابزار مراقبت از دستگاه سامسونگ، در صورت نصب بودن.",
+                "com.samsung.android.lool"
+            );
+        }
+
+        String manufacturer =
+            Build.MANUFACTURER.toLowerCase(Locale.ROOT);
+
+        if(manufacturer.contains("xiaomi") ||
+           manufacturer.contains("redmi") ||
+           manufacturer.contains("poco")) {
+
+            addVendorAction(
+                "ابزار امنیت و پاک‌سازی شیائومی",
+                "باز کردن برنامه امنیتی رسمی گوشی، در صورت موجود بودن.",
+                "com.miui.securitycenter"
+            );
+        }
+
+        Button refresh = button("بررسی دوباره گوشی");
+        refresh.setOnClickListener(v -> showSmartOptimizer());
+        content.addView(refresh);
+
+        Button back = button("بازگشت به صفحه اصلی");
+        back.setOnClickListener(v -> buildUi());
+        content.addView(back);
+    }
+
+    private void addAction(
+        String title,
+        String description,
+        String action
+    ) {
+        LinearLayout p = panel();
+
+        p.addView(text(title,17,GREEN,true));
+        p.addView(text(description,13,WHITE,false));
+
+        Button execute = button("بررسی و اجرای این اقدام");
+
+        execute.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(
+                    description +
+                    "\n\nاین اقدام تنظیمات گوشی را باز می‌کند. تغییرات را خودت انجام بده."
+                )
+                .setNegativeButton("لغو",null)
+                .setPositiveButton("ادامه",(d,w) -> {
+                    openSettings(action);
+                })
+                .show();
+        });
+
+        p.addView(execute);
+        content.addView(p);
+    }
+
+    private void addVendorAction(
+        String title,
+        String description,
+        String packageName
+    ) {
+        LinearLayout p = panel();
+
+        p.addView(text(title,17,GREEN,true));
+        p.addView(text(description,13,WHITE,false));
+
+        Button execute = button("باز کردن ابزار سازنده");
+
+        execute.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(
+                    description +
+                    "\n\nآیا اجازه می‌دهی برنامه سازنده باز شود؟"
+                )
+                .setNegativeButton("لغو",null)
+                .setPositiveButton("باز کن",(d,w) -> {
+                    try {
+                        Intent launch = getPackageManager()
+                            .getLaunchIntentForPackage(packageName);
+
+                        if(launch != null) {
+                            startActivity(launch);
+                        } else {
+                            openSettings(
+                                android.provider.Settings.ACTION_SETTINGS
+                            );
+                        }
+                    } catch(Exception e) {
+                        openSettings(
+                            android.provider.Settings.ACTION_SETTINGS
+                        );
+                    }
+                })
+                .show();
+        });
+
+        p.addView(execute);
+        content.addView(p);
+    }
+
+    private void openSettings(String action) {
+        try {
+            startActivity(new Intent(action));
+        } catch(Exception e) {
+            try {
+                startActivity(new Intent(
+                    android.provider.Settings.ACTION_SETTINGS
+                ));
+            } catch(Exception ignored) {
+                new AlertDialog.Builder(this)
+                    .setMessage("باز کردن تنظیمات این دستگاه ممکن نشد.")
+                    .setPositiveButton("باشه",null)
+                    .show();
+            }
+        }
     }
 
     private void showDashboard() {
         content.removeAllViews();
 
-        TextView title = text("داشبورد بهینه‌سازی",24,GREEN,true);
+        TextView title = text(
+            "داشبورد بهینه‌سازی",24,GREEN,true
+        );
         title.setGravity(Gravity.CENTER);
         content.addView(title);
 
@@ -173,20 +403,6 @@ public class MainActivity extends Activity {
         refresh.setOnClickListener(v -> showDashboard());
         content.addView(refresh);
 
-        Button batterySettings = button("مدیریت مصرف باتری");
-        batterySettings.setOnClickListener(v -> {
-            try {
-                startActivity(new Intent(
-                    android.provider.Settings.ACTION_BATTERY_SAVER_SETTINGS
-                ));
-            } catch(Exception e) {
-                startActivity(new Intent(
-                    android.provider.Settings.ACTION_SETTINGS
-                ));
-            }
-        });
-        content.addView(batterySettings);
-
         Button back = button("بازگشت به صفحه اصلی");
         back.setOnClickListener(v -> buildUi());
         content.addView(back);
@@ -194,9 +410,7 @@ public class MainActivity extends Activity {
 
     private String percentage(long used,long total) {
         if(total <= 0) return "0";
-        return String.valueOf(
-            Math.min(100,(used*100/total))
-        );
+        return String.valueOf(Math.min(100,(used*100/total)));
     }
 
     private String formatSize(long bytes) {
@@ -389,5 +603,5 @@ public class MainActivity extends Activity {
             v*getResources().getDisplayMetrics().density+0.5f
         );
     }
-    }
-                
+            }
+                                
