@@ -15,6 +15,7 @@ import android.os.StatFs;
 import android.os.BatteryManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -52,7 +53,17 @@ public class MainActivity extends Activity {
 
     private void buildUi() {
         ScrollView scroll = new ScrollView(this);
-        scroll.setBackgroundColor(BG);
+
+        GradientDrawable background = new GradientDrawable(
+            GradientDrawable.Orientation.TL_BR,
+            new int[]{
+                Color.rgb(5,12,22),
+                Color.rgb(9,25,35),
+                Color.rgb(4,15,24)
+            }
+        );
+
+        scroll.setBackground(background);
 
         content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
@@ -103,6 +114,7 @@ public class MainActivity extends Activity {
         String model = Build.MODEL.toLowerCase(Locale.ROOT);
 
         if(brand.contains("samsung")) return "Samsung Galaxy / One UI";
+
         if(brand.contains("xiaomi") ||
            brand.contains("redmi") ||
            brand.contains("poco") ||
@@ -110,6 +122,7 @@ public class MainActivity extends Activity {
            model.contains("poco")) {
             return "Xiaomi / Redmi / POCO";
         }
+
         if(brand.contains("google")) return "Google Pixel";
         if(brand.contains("huawei")) return "Huawei";
         if(brand.contains("honor")) return "HONOR";
@@ -549,31 +562,67 @@ public class MainActivity extends Activity {
         content.addView(p);
     }
 
+    // Glassmorphism panel
     private LinearLayout panel() {
         LinearLayout p = new LinearLayout(this);
         p.setOrientation(LinearLayout.VERTICAL);
-        p.setPadding(dp(16),dp(14),dp(16),dp(14));
-        p.setBackgroundColor(PANEL);
+        p.setPadding(dp(18),dp(16),dp(18),dp(16));
+
+        GradientDrawable glass = new GradientDrawable(
+            GradientDrawable.Orientation.TL_BR,
+            new int[]{
+                Color.argb(125,45,75,90),
+                Color.argb(75,20,40,55)
+            }
+        );
+
+        glass.setCornerRadius(dp(22));
+        glass.setStroke(
+            dp(1),
+            Color.argb(100,180,255,245)
+        );
+
+        p.setBackground(glass);
+        p.setElevation(dp(5));
 
         LinearLayout.LayoutParams lp =
             new LinearLayout.LayoutParams(-1,-2);
 
-        lp.setMargins(0,dp(14),0,dp(4));
+        lp.setMargins(0,dp(12),0,dp(6));
         p.setLayoutParams(lp);
 
         return p;
     }
 
+    // Glass gradient button
     private Button button(String label) {
         Button b = new Button(this);
         b.setText(label);
-        b.setTextColor(Color.BLACK);
-        b.setBackgroundColor(GREEN);
+        b.setTextColor(Color.WHITE);
+        b.setTextSize(14);
+        b.setAllCaps(false);
+
+        GradientDrawable glassButton = new GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT,
+            new int[]{
+                Color.rgb(0,130,105),
+                Color.rgb(0,190,125)
+            }
+        );
+
+        glassButton.setCornerRadius(dp(18));
+        glassButton.setStroke(
+            dp(1),
+            Color.argb(150,170,255,225)
+        );
+
+        b.setBackground(glassButton);
+        b.setElevation(dp(4));
 
         LinearLayout.LayoutParams lp =
             new LinearLayout.LayoutParams(-1,-2);
 
-        lp.setMargins(0,dp(10),0,0);
+        lp.setMargins(0,dp(10),0,dp(4));
         b.setLayoutParams(lp);
 
         return b;
@@ -603,5 +652,5 @@ public class MainActivity extends Activity {
             v*getResources().getDisplayMetrics().density+0.5f
         );
     }
-            }
-                                
+                }
+            
