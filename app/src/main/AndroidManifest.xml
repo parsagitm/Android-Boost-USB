@@ -1,9 +1,13 @@
+
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
     <application
-        android:label="Android Boost USB"
+        android:label="Android Boost"
+        android:icon="@drawable/android_boost_logo"
+        android:roundIcon="@drawable/android_boost_logo"
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:allowBackup="false">
 
